@@ -40,9 +40,9 @@ namespace ooptimizer {
      *
      *     using OOptimizerOperations =
      *         ooptimizer::OperationSet<
-     *             ooptimizer::OperationBinding<GameOperation::Update,
-     *                 []<class T>(T& object) { object.T::Update(); }>,
-     *             ooptimizer::OperationBinding<GameOperation::Checksum, &GameObject::CollectChecksum>>;
+     *             ooptimizer::OperationBinding<GameOperation::Update,[]<class T>(T& object) { object.T::Update(); }>,
+     *             ooptimizer::OperationBinding<GameOperation::Checksum, &GameObject::CollectChecksum>
+     *         >;
      * };
      * @endcode
      */
