@@ -69,11 +69,11 @@ namespace ooptimizer {
 
     public:
         /*!
-         * @brief ObjectOptimizerを構築・破棄する。
+         * @name 構築と破棄
          *
-         * @details 空の状態で構築し、破棄時に管理中の全格納領域とオブジェクトを破棄します。
-		 *          コピー構築とコピー代入は許可しません。
-         *          ムーブ構築とムーブ代入は許可しています。
+         * 空の状態で構築し、破棄時に管理中の全オブジェクトと格納領域を破棄する。
+         * コピーとムーブはできない。
+         * @{
          */
         ObjectOptimizer() noexcept;
 
@@ -82,6 +82,7 @@ namespace ooptimizer {
         ObjectOptimizer(const ObjectOptimizer&) = delete;
 
         ObjectOptimizer& operator=(const ObjectOptimizer&) = delete;
+        /// @}
 
         /*!
          * @brief 具体型を登録し、必要に応じて領域を事前確保する。
@@ -127,6 +128,7 @@ namespace ooptimizer {
          *          フェーズ終了後に移動せず実行対象へ追加する。
          *
          * @pre Execute中ではないこと。
+         * @note 具体型はRegisterで指定した優先度の昇順に実行する。同値の場合は初回登録順。
          * @note 列挙型が異なっても数値が同じ場合は同じ処理IDとして扱う。
          * @note 関連付けた処理、削除、保留統合またはメモリ確保中に例外が送出された場合はstd::terminate()を呼び出す。
          */
@@ -150,45 +152,87 @@ namespace ooptimizer {
         /*!
          * @brief 指定した具体型の稼働数と保留数の合計を取得する。
          * @tparam T 要素数を取得する具体型。
-         * @return Tの管理数。Tが未登録の場合は0。
+         * @return Tの管理数。Tの格納領域が存在しない場合は0。
          */
         template<class T>
         [[nodiscard]]
         std::size_t Count() const noexcept;
 
     private:
+        /*! @brief 型に依存しない格納領域の内部インターフェース。 */
         class IStorage;
 
+        /*! @brief 具体型Tのオブジェクトを固定長ブロックに格納する。 */
         template<class T> 
         class Storage;
 
+        /*! @brief 具体型Tの処理定義を実行プランへ登録する。 */
         template<class T> 
         class RegistrationBuilder;
 
+        /*! @brief 具体型の識別キーと対応する格納領域を保持する。 */
         struct TypeEntry;
 
+        /*! @brief 実行プラン内の1つの具体型と、その実行関数を保持する。 */
         struct PlanNode;
 
+        /*!
+         * @brief 管理対象オブジェクトに削除要求の送信先を設定する。
+         * @param[in,out] object 管理対象オブジェクト。
+         * @param[in] queue オブジェクトを格納するブロックの削除要求先。
+         */
         static void BindManagedObject(OptimizedObject& object, detail::IDestroyQueue* queue) noexcept;
 
+        /*!
+         * @brief Tの型要件をコンパイル時に検証する。
+         * @tparam T Baseまたはその派生型で、破棄可能な具象型。
+         */
         template<class T> 
         static consteval void ValidateType();
 
+        /*!
+         * @brief 具体型の格納領域を取得し、存在しなければ新たに作成する。
+         * @tparam T 格納する具体型。
+         * @return Tに対応する格納領域への参照。
+         */
         template<class T> 
         Storage<T>& EnsureStorage() noexcept;
 
+        /*!
+         * @brief 処理IDに対応する実行プランへTの実行関数を追加または更新し、実行順を整える。
+         * @tparam T 処理を実行する具体型。
+         * @tparam OperationValue 処理ID。
+         * @tparam Method T&で呼び出せる処理。
+         * @param[in] storage Tの格納領域。
+         */
         template<class T, auto OperationValue, auto Method> 
         void BindImpl(Storage<T>& storage) noexcept;
 
+        /*!
+         * @brief 具体型の格納領域にある稼働中の各オブジェクトに処理を適用する。
+         * @tparam T 処理を実行する具体型。
+         * @tparam Method T&で呼び出せる処理。
+         * @param[in,out] storageAddress Tに対応する格納領域。
+         */
         template<class T, auto Method> 
         static void ExecuteStorage(IStorage* storageAddress) noexcept;
 
+        /*!
+         * @brief 削除要求のある格納領域を次回の削除処理の対象に追加する。
+         * @param[in] storage 削除要求のある格納領域。
+         */
         void RegisterDestroyDirty(IStorage* storage) noexcept;
 
+        /*!
+         * @brief 保留オブジェクトのある格納領域を次回の統合処理の対象に追加する。
+         * @param[in] storage 保留オブジェクトのある格納領域。
+         */
         void RegisterPendingDirty(IStorage* storage) noexcept;
 
+        /*! @brief 削除要求のある格納領域を走査し、要求されたオブジェクトを破棄する。 */
         void FlushDestroyQueues() noexcept;
 
+        /*! @brief 保留オブジェクトを同じ格納位置のまま実行対象に加える。 */
         void MergePending() noexcept;
 
     private:

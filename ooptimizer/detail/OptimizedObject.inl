@@ -9,6 +9,7 @@ namespace ooptimizer::detail {
      */
     class IDestroyQueue {
     public:
+        /*! @brief 削除要求のインターフェースを通して派生型を破棄する。 */
         virtual ~IDestroyQueue() = default;
 
         /*!

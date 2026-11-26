@@ -18,7 +18,7 @@ namespace ooptimizer {
          * @brief このオブジェクトの削除を要求する。
          *
          * @details 同じオブジェクトから複数回呼び出しても、削除要求は1回だけ登録されます。
-         *          実際の削除はObjectOptimizerが削除待ちキューを処理するときに行わます。
+         *          実際の削除はObjectOptimizerが削除待ちキューを処理するときに行われます。
          *
          * @pre ObjectOptimizerに管理されていること。
          * @note 削除要求の登録中に例外が送出された場合はstd::terminate()を呼び出す。
@@ -34,10 +34,11 @@ namespace ooptimizer {
 
     protected:
         /*!
-         * @brief 派生型からのみ使用できる標準の特殊メンバー関数。
+         * @name 構築・代入・破棄
          *
-         * @details 管理先は各オブジェクトの格納位置に紐づく。コピー・ムーブ構築では引き継がず、
-         *          代入では代入先の管理先を維持する。
+         * 管理先は各オブジェクトの格納位置に紐づく。コピー・ムーブ構築の直後は未管理となり、
+         * 代入では代入先の管理先を維持する。
+         * @{
          */
         OptimizedObject() = default;
 
@@ -50,12 +51,17 @@ namespace ooptimizer {
         OptimizedObject& operator=(OptimizedObject&&) noexcept { return *this; }
 
         ~OptimizedObject() = default;
+        /// @}
 
     private:
         template<class> 
         friend class ObjectOptimizer;
 
-        void BindDestroyQueue(detail::IDestroyQueue* queue) noexcept {
+        /*!
+         * @brief このオブジェクトの削除要求の送信先を設定する。
+         * @param[in] queue 所属する格納ブロックの削除要求先。
+         */
+        inline void BindDestroyQueue(detail::IDestroyQueue* queue) noexcept {
             destroyQueue_ = queue;
         }
 
