@@ -377,8 +377,7 @@ namespace ooptimizer {
             void QueueDestroy(OptimizedObject* object) noexcept override {
                 const std::uint64_t bit{ObjectBit(object)};
                 assert(bit != 0 && "このブロックに所属しないオブジェクトです。");
-                if (bit == 0 || (destroyRequested & bit) != 0)
-                    return;
+                if (bit == 0 || (destroyRequested & bit) != 0) return;
 
                 owner.destroyQueue_.push_back(DestroyRequest{this, bit});
                 destroyRequested |= bit;
@@ -416,8 +415,7 @@ namespace ooptimizer {
              */
             std::uint64_t ObjectBit(const OptimizedObject* object) const noexcept {
                 const std::uintptr_t begin{reinterpret_cast<std::uintptr_t>(data)};
-                const std::uintptr_t address{
-                    reinterpret_cast<std::uintptr_t>(static_cast<const T*>(object))};
+                const std::uintptr_t address{reinterpret_cast<std::uintptr_t>(static_cast<const T*>(object))};
                 const std::uintptr_t offset{address - begin};
 
                 if (address < begin || offset >= sizeof(data) || offset % sizeof(T) != 0) return 0;
@@ -518,6 +516,7 @@ namespace ooptimizer {
                     for (std::size_t index{}; index < count; ++index) {
                         std::invoke(Method, page.Object(index));
                     }
+
                     continue;
                 }
 
@@ -537,8 +536,7 @@ namespace ooptimizer {
                 const std::uint64_t bit{request.bit};
 
                 std::destroy_at(std::addressof(page.Object(std::countr_zero(bit))));
-                if (page.occupied == FullPageMask)
-                    recycledPages_.push_back(&page);
+                if (page.occupied == FullPageMask) recycledPages_.push_back(&page);
 
                 if ((page.active & bit) != 0) --activeCount_;
                 else --pendingCount_;
@@ -651,9 +649,7 @@ namespace ooptimizer {
 
         const void* key = detail::TypeKey<T>();
 
-        assert((!isExecuting_ || typeIndex_.find(key) != typeIndex_.end()) &&
-               "Execute()中にTを生成する前に"
-               "Register<T>()を呼び出す必要があります。");
+        assert((!isExecuting_ || typeIndex_.find(key) != typeIndex_.end()) && "Execute()中にTを生成する前にRegister<T>()を呼び出す必要があります。");
 
         Storage<T>& storage = EnsureStorage<T>();
 
@@ -693,8 +689,7 @@ namespace ooptimizer {
 
     template<class Base> 
     void ObjectOptimizer<Base>::FlushDestroyed() noexcept {
-        assert(!isExecuting_ && "Execute()中にFlushDestroyed()を"
-                                "呼び出すことはできません。");
+        assert(!isExecuting_ && "Execute()中にFlushDestroyed()を呼び出すことはできません。");
 
         FlushDestroyQueues();
 
