@@ -36,7 +36,9 @@ namespace ooptimizer::detail {
         }
     }
 
-    /*! @brief OperationBindingを識別するための基底型。 */
+    /*!
+    *   @brief OperationBindingを識別するための基底型。
+    */
     struct OperationBindingTag {};
 
 } // namespace ooptimizer::detail
@@ -45,16 +47,22 @@ namespace ooptimizer {
 
     template<auto OperationValue, auto MethodValue> 
     struct OperationBinding : detail::OperationBindingTag {
-        /*! @brief 処理IDの型。 */
+        /*!
+        *   @brief 処理IDの型。
+        */
         using OperationType = std::remove_cv_t<decltype(OperationValue)>;
 
         static_assert(std::is_enum_v<OperationType> || (std::is_integral_v<OperationType> && !std::is_same_v<OperationType, bool>),
                       "OperationBindingの処理IDには列挙値またはbool以外の整数を指定する必要があります。");
 
-        /*! @brief 登録する処理ID。 */
+        /*!
+        *   @brief 登録する処理ID。
+        */
         static constexpr auto Value = OperationValue;
 
-        /*! @brief オブジェクトごとに呼び出す処理。 */
+        /*!
+        *   @brief オブジェクトごとに呼び出す処理。
+        */
         static constexpr auto Method = MethodValue;
     };
 
@@ -64,7 +72,9 @@ namespace ooptimizer::detail {
 
     // 処理定義の検証
 
-    /*! @brief TがOperationBindingの識別用基底型を持つかを表す。 */
+    /*!
+    *   @brief TがOperationBindingの識別用基底型を持つかを表す。
+    */
     template<class T> 
     inline constexpr bool kIsOperationBinding = std::is_base_of_v<OperationBindingTag, T>;
 
@@ -108,15 +118,21 @@ namespace ooptimizer {
 
 namespace ooptimizer::detail {
 
-    /*! @brief TがOperationSetであるかを表す型判定。 */
+    /*!
+    *   @brief TがOperationSetであるかを表す型判定。
+    */
     template<class T> 
     inline constexpr bool kIsOperationSet = false;
 
-    /*! @brief OperationSetの実体化を通じて、処理定義の型とIDを検証する。 */
+    /*!
+    *   @brief OperationSetの実体化を通じて、処理定義の型とIDを検証する。
+    */
     template<class... Bindings>
     inline constexpr bool kIsOperationSet<OperationSet<Bindings...>> = sizeof(OperationSet<Bindings...>) > 0;
 
-    /*! @brief OperationSetに含まれる処理を登録するための内部型。 */
+    /*!
+    *   @brief OperationSetに含まれる処理を登録するための内部型。
+    */
     template<class OperationSetType> 
     struct OperationSetBinder;
 
@@ -161,7 +177,9 @@ namespace ooptimizer {
     template<class Base> 
     class ObjectOptimizer<Base>::IStorage {
     public:
-        /*! @brief 内部インターフェースを通して具体型の格納領域を破棄する。 */
+        /*!
+        *   @brief 内部インターフェースを通して具体型の格納領域を破棄する。
+        */
         virtual ~IStorage() = default;
 
         /*!
@@ -181,31 +199,43 @@ namespace ooptimizer {
             return true;
         }
 
-        /*! @return 現在の実行優先度。 */
+        /*!
+        *   @return 現在の実行優先度。
+        */
         [[nodiscard]]
         inline std::int32_t ExecutionPriority() const noexcept {
             return executionPriority_;
         }
 
-        /*! @return 優先度が同じときの比較に使う初回登録順。 */
+        /*!
+        *   @return 優先度が同じときの比較に使う初回登録順。
+        */
         [[nodiscard]]
         inline std::size_t FirstRegistrationOrder() const noexcept {
             return firstRegistrationOrder_;
         }
 
-        /*! @return 実行対象になっているオブジェクト数。 */
+        /*!
+        *   @return 実行対象になっているオブジェクト数。
+        */
         [[nodiscard]]
         virtual std::size_t Size() const noexcept = 0;
 
-        /*! @return 実行対象への追加を待っているオブジェクト数。 */
+        /*!
+        *   @return 実行対象への追加を待っているオブジェクト数。
+        */
         [[nodiscard]]
         virtual std::size_t PendingSize() const noexcept = 0;
 
 
-        /*! @brief この格納領域の削除要求を反映する。 */
+        /*!
+        *   @brief この格納領域の削除要求を反映する。
+        */
         virtual void FlushDestroyQueue() noexcept = 0;
 
-        /*! @brief この格納領域の保留オブジェクトを実行対象に加える。 */
+        /*!
+        *   @brief この格納領域の保留オブジェクトを実行対象に加える。
+        */
         virtual void MergePending() noexcept = 0;
 
     private:
@@ -218,23 +248,35 @@ namespace ooptimizer {
 
     template<class Base> 
     struct ObjectOptimizer<Base>::TypeEntry {
-        /*! @brief 格納している具体型の識別キー。 */
+        /*!
+        *   @brief 格納している具体型の識別キー。
+        */
         const void* typeKey = nullptr;
 
-        /*! @brief この登録情報が所有する型別格納領域。 */
+        /*!
+        *   @brief この登録情報が所有する型別格納領域。
+        */
         std::unique_ptr<IStorage> storage;
     };
 
     template<class Base> 
     struct ObjectOptimizer<Base>::PlanNode {
-        /*! @brief 実行プラン内で具体型を照合するキー。 */
+        using Runner = void (*)(IStorage*) noexcept;
+
+        /*!
+        *   @brief 実行プラン内で具体型を照合するキー。
+        */
         const void* typeKey = nullptr;
 
-        /*! @brief 処理対象となる格納領域への非所有ポインタ。 */
+        /*!
+        *   @brief 処理対象となる格納領域への非所有ポインタ。
+        */
         IStorage* storage = nullptr;
 
-        /*! @brief 対応する具体型の稼働中オブジェクトを処理する関数。 */
-        void (*runner)(IStorage* storage) noexcept = nullptr;
+        /*!
+        *   @brief 対応する具体型の稼働中オブジェクトを処理する関数。
+        */
+        Runner runner = nullptr;
     };
 
     template<class Base> template<class T> 
@@ -268,20 +310,28 @@ namespace ooptimizer {
     template<class Base>
     template<class T>
     class ObjectOptimizer<Base>::Storage final : public ObjectOptimizer<Base>::IStorage {
-        /*! @brief 1ブロックに格納できるオブジェクト数。 */
+        /*!
+        *   @brief 1ブロックに格納できるオブジェクト数。
+        */
         static constexpr std::size_t SlotsPerPage{std::clamp<std::size_t>(4096 / sizeof(T), 1, 64)};
-        /*! @brief ブロック内の有効なスロットに対応するビットマスク。 */
+        /*!
+        *   @brief ブロック内の有効なスロットに対応するビットマスク。
+        */
         static constexpr std::uint64_t FullPageMask{~std::uint64_t{} >> (64 - SlotsPerPage)};
 
         struct Page;
 
-        /*! @brief 削除対象を格納ブロックとスロットのビットで指定する。 */
+        /*!
+        *   @brief 削除対象を格納ブロックとスロットのビットで指定する。
+        */
         struct DestroyRequest {
             Page* page;
             std::uint64_t bit;
         };
 
-        /*! @brief Tの固定長格納ブロック。所属するオブジェクトの削除要求も受け付ける。 */
+        /*!
+        *   @brief Tの固定長格納ブロック。所属するオブジェクトの削除要求も受け付ける。
+        */
         struct Page final : detail::IDestroyQueue {
             /*!
              * @name 構築と破棄
@@ -344,11 +394,17 @@ namespace ooptimizer {
             }
 
             Storage& owner;
-            /*! @brief 構築済みの全スロットを表すビットマスク。 */
+            /*!
+            *   @brief 構築済みの全スロットを表すビットマスク。
+            */
             std::uint64_t occupied{};
-            /*! @brief 実行対象のスロットを表すビットマスク。 */
+            /*!
+            *   @brief 実行対象のスロットを表すビットマスク。
+            */
             std::uint64_t active{};
-            /*! @brief 削除要求が登録済みのスロットを表すビットマスク。 */
+            /*!
+            *   @brief 削除要求が登録済みのスロットを表すビットマスク。
+            */
             std::uint64_t destroyRequested{};
 
         private:
@@ -433,9 +489,13 @@ namespace ooptimizer {
             while (pages_.size() < required)pages_.push_back(std::make_unique<Page>(*this));
         }
 
-        /*! @return この型の稼働中のオブジェクト数。 */
+        /*!
+        *   @return この型の稼働中のオブジェクト数。
+        */
         [[nodiscard]] std::size_t Size() const noexcept override { return activeCount_; }
-        /*! @return この型の保留中のオブジェクト数。 */
+        /*!
+        *   @return この型の保留中のオブジェクト数。
+        */
         [[nodiscard]] std::size_t PendingSize() const noexcept override { return pendingCount_; }
 
         /*!
@@ -466,7 +526,9 @@ namespace ooptimizer {
             }
         }
 
-        /*! @brief 削除要求を反映し、対象オブジェクトのスロットを再利用できる状態にする。 */
+        /*!
+        *   @brief 削除要求を反映し、対象オブジェクトのスロットを再利用できる状態にする。
+        */
         void FlushDestroyQueue() noexcept override {
             for (std::size_t i{}; i < destroyQueue_.size(); ++i) {
                 const DestroyRequest request{destroyQueue_[i]};
@@ -489,7 +551,9 @@ namespace ooptimizer {
             destroyDirtyRegistered_ = false;
         }
 
-        /*! @brief 保留オブジェクトを現在の格納位置のまま実行対象に加える。 */
+        /*!
+        *   @brief 保留オブジェクトを現在の格納位置のまま実行対象に加える。
+        */
         void MergePending() noexcept override {
             if (pendingCount_ != 0) {
                 const std::size_t pageCount{std::min(nextPage_ + 1, pages_.size())};
@@ -505,7 +569,9 @@ namespace ooptimizer {
         }
 
     private:
-        /*! @brief 次回の削除処理の対象として、この格納領域を一度だけ登録する。 */
+        /*!
+        *   @brief 次回の削除処理の対象として、この格納領域を一度だけ登録する。
+        */
         void MarkDestroyDirty() noexcept {
             if (!destroyDirtyRegistered_) {
                 owner_.RegisterDestroyDirty(this);

@@ -159,21 +159,31 @@ namespace ooptimizer {
         std::size_t Count() const noexcept;
 
     private:
-        /*! @brief 型に依存しない格納領域の内部インターフェース。 */
+        /*!
+        *   @brief 型に依存しない格納領域の内部インターフェース。
+        */
         class IStorage;
 
-        /*! @brief 具体型Tのオブジェクトを固定長ブロックに格納する。 */
+        /*!
+        *   @brief 具体型Tのオブジェクトを固定長ブロックに格納する。
+        */
         template<class T> 
         class Storage;
 
-        /*! @brief 具体型Tの処理定義を実行プランへ登録する。 */
+        /*!
+        *   @brief 具体型Tの処理定義を実行プランへ登録する。
+        */
         template<class T> 
         class RegistrationBuilder;
 
-        /*! @brief 具体型の識別キーと対応する格納領域を保持する。 */
+        /*!
+        *   @brief 具体型の識別キーと対応する格納領域を保持する。
+        */
         struct TypeEntry;
 
-        /*! @brief 実行プラン内の1つの具体型と、その実行関数を保持する。 */
+        /*!
+        *   @brief 実行プラン内の1つの具体型と、その実行関数を保持する。
+        */
         struct PlanNode;
 
         /*!
@@ -229,10 +239,14 @@ namespace ooptimizer {
          */
         void RegisterPendingDirty(IStorage* storage) noexcept;
 
-        /*! @brief 削除要求のある格納領域を走査し、要求されたオブジェクトを破棄する。 */
+        /*!
+        *   @brief 削除要求のある格納領域を走査し、要求されたオブジェクトを破棄する。
+        */
         void FlushDestroyQueues() noexcept;
 
-        /*! @brief 保留オブジェクトを同じ格納位置のまま実行対象に加える。 */
+        /*!
+        *   @brief 保留オブジェクトを同じ格納位置のまま実行対象に加える。
+        */
         void MergePending() noexcept;
 
     private:
