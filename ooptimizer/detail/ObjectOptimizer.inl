@@ -343,8 +343,9 @@ namespace ooptimizer {
             explicit Page(Storage& storage) noexcept : owner{storage} {}
 
             ~Page() noexcept override {
-                for (std::uint64_t mask{occupied}; mask != 0; mask &= mask - 1)
+                for (std::uint64_t mask{ occupied }; mask != 0; mask &= mask - 1) {
                     std::destroy_at(std::addressof(Object(std::countr_zero(mask))));
+                }
             }
             /// @}
 
